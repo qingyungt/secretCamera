@@ -43,12 +43,14 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
         super(context, attrs);
     }
 
-    public void init(Camera camera,PictureCallback jpegCallback ) {
+    public void init(Camera camera, PictureCallback jpegCallback,
+            AutoFocusCallback autoFocusCallback) {
         mHolder = getHolder();
         mHolder.addCallback(this);
         mHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
         this.camera = camera;
         this.jpegCallback = jpegCallback;
+        this.autoFocusCallback = autoFocusCallback;
     }
 
     @Override
@@ -68,13 +70,7 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
         this.camera.setParameters(parameters); // 设置完效果后必须有这个
         // 开始预览
         this.camera.startPreview();
-        this.camera.autoFocus(new AutoFocusCallback() {
-
-            @Override
-            public void onAutoFocus(boolean success, Camera camera) {
-                camera.takePicture(null, null, jpegCallback); // 拍照动作
-            }
-        });
+        this.camera.autoFocus(autoFocusCallback);
     }
 
     @Override
@@ -99,5 +95,9 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
         // 释放Camera
         this.camera.release();
         this.camera = null;
+    }
+
+    public void takePicture() {
+        camera.takePicture(null, null, jpegCallback); // 拍照动作
     }
 }

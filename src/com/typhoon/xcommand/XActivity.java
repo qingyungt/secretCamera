@@ -5,6 +5,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.graphics.PixelFormat;
 import android.hardware.Camera;
+import android.hardware.Camera.AutoFocusCallback;
 import android.hardware.Camera.Parameters;
 import android.hardware.Camera.PictureCallback;
 import android.hardware.Camera.ShutterCallback;
@@ -28,6 +29,7 @@ public class XActivity extends Activity {
 
     static final String TAG = "zhangcheng";
     private CameraPreview preview;
+    private TextView takePictureButton;
     Camera camera;
     private ToneGenerator tone;
     private static final int OPTION_SNAPSHOT = 0; // MENU项的值
@@ -38,17 +40,19 @@ public class XActivity extends Activity {
         // setContentView(R.layout.activity_camera_android);
         setContentView(R.layout.activity_x);
         preview = (CameraPreview) findViewById(R.id.cameraView); // 自定义的view
-        preview.init(camera, jpegCallback);
+        preview.init(camera, jpegCallback, autoFocusCallBack);
         // setContentView(preview);
 
-        TextView takePictureButton = (TextView) findViewById(R.id.takePicture);
+        takePictureButton = (TextView) findViewById(R.id.takePicture);
         takePictureButton.setOnClickListener(new View.OnClickListener() {
 
             @Override
             public void onClick(View v) {
-                camera.takePicture(null, null, jpegCallback); // 拍照动作
+                preview.takePicture();
             }
         });
+
+        takePictureButton.setClickable(false);
     }
 
     @Override
@@ -66,7 +70,7 @@ public class XActivity extends Activity {
         switch (itemId) {
             case OPTION_SNAPSHOT:
                 // 拍摄照片
-                camera.takePicture(null, null, jpegCallback); // 拍照动作
+                preview.takePicture();
                 break;
         }
         return true;
@@ -99,6 +103,15 @@ public class XActivity extends Activity {
                 // 发出提示用户的声音
                 tone = new ToneGenerator(AudioManager.STREAM_MUSIC, ToneGenerator.MAX_VOLUME);
             tone.startTone(ToneGenerator.TONE_PROP_BEEP2);
+        }
+    };
+
+    private AutoFocusCallback autoFocusCallBack = new AutoFocusCallback() {
+
+        @Override
+        public void onAutoFocus(boolean success, Camera camera) {
+//            camera.takePicture(null, null, jpegCallback); // 拍照动作
+            takePictureButton.setClickable(true);
         }
     };
 
